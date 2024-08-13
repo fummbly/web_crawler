@@ -2,13 +2,20 @@
   "name": "web_crawler",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "jest": {
+    "transform": {}
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "eslint": "^9.9.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
