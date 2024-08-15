@@ -1,8 +1,24 @@
-import { getURLsFromHTML } from "./crawl.js";
+import { argv } from 'node:process'
+import { crawlPage } from './crawl.js'
 
-const htmlBody =
-  '<html><body><a href="/path/one"><span>Boot.dev</span></a><a href="https://www.google.com"><span>Google</span></a></body></html>';
 
-const baseURL = "https://blog.boot.dev";
+function main(argv) {
+  if (argv.length > 3) {
+    console.log("Too many arguments")
+    return
+  } else if (argv.length < 3) {
+    console.log("No baseURL provided")
+    return
+  }
 
-console.log(getURLsFromHTML(htmlBody, baseURL));
+  const url = argv[2]
+
+  console.log(`Starting crawling with: ${url}`)
+
+
+
+  crawlPage(url)
+
+}
+
+main(argv)
