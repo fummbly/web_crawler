@@ -3,7 +3,8 @@ import { JSDOM } from "jsdom";
 function normalizeURL(url) {
   const urlObj = new URL(url);
 
-  let fullPath = `${urlObj.hostname}${urlObj.pathname}`;
+
+  let fullPath = `${urlObj.host}${urlObj.pathname}`;
 
   if (fullPath.endsWith("/")) {
     fullPath = fullPath.slice(0, -1);
@@ -18,21 +19,27 @@ function getURLsFromHTML(htmlBody, baseURL) {
   let finalPaths = [];
 
   for (const path of aTags) {
-    if (path.href[0] === "/") {
-      finalPaths.push(`${baseURL}${path.href}`);
-    } else {
-      finalPaths.push(path.href);
+    if (path.hasAttribute('href')) {
+      let href = path.getAttribute('href')
+
+      try {
+        href = new URL(href, baseURL).href
+        finalPaths.push(href)
+      } catch (err) {
+        console.log(`${err.message}: ${href}`)
+      }
     }
   }
   return finalPaths;
+
 }
 
 
-async function crawlPage(baseURL) {
+async function getPageData(url) {
 
   let res
   try {
-    res = await fetch(baseURL)
+    res = await fetch(url)
   } catch (err) {
     throw new Error(`Got Network err: ${err.message}`)
   }
@@ -49,9 +56,46 @@ async function crawlPage(baseURL) {
   }
 
 
-  const html = await res.text()
+  return await res.text()
+}
 
-  console.log(html)
+
+async function crawlPage(baseURL, currentURL = baseURL, pages = {}) {
+  const currURLObj = new URL(currentURL)
+  const baseURLObj = new URL(baseURL)
+
+  if (currURLObj.hostname !== baseURLObj.hostname) {
+    return pages
+  }
+
+  const normCurrURL = normalizeURL(currentURL)
+
+  if (pages[normCurrURL] > 0) {
+    pages[normCurrURL]++
+    return pages
+  }
+
+  pages[normCurrURL] = 1
+
+  let html = ''
+  console.log(`Crawling page: ${currentURL}`)
+  try {
+
+    html = await getPageData(currentURL)
+  } catch (err) {
+    console.log(err.message)
+    return pages
+  }
+
+  const nextURLs = getURLsFromHTML(html, baseURL)
+  for (const nextURL of nextURLs) {
+    pages = await crawlPage(baseURL, nextURL, pages)
+  }
+
+
+  return pages
+
+
 
 
 }

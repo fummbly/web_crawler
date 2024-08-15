@@ -2,7 +2,7 @@ import { argv } from 'node:process'
 import { crawlPage } from './crawl.js'
 
 
-function main(argv) {
+async function main(argv) {
   if (argv.length > 3) {
     console.log("Too many arguments")
     return
@@ -17,7 +17,10 @@ function main(argv) {
 
 
 
-  crawlPage(url)
+  const pages = await crawlPage(url)
+
+  console.log(pages)
+
 
 }
 
